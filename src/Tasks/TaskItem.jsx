@@ -56,45 +56,49 @@ const TaskItem = ({
       <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
         <Checkbox checked={task.completed} onChange={onToggle} />
         <Box sx={{ flexGrow: 1 }}>
-          <Typography
-            variant="body2"
-            sx={{ textDecoration: task.completed ? "line-through" : "none" }}
-          >
-            {highlightText(task.title, searchText)}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {task.date}
-          </Typography>
+          {isEditing && !task.completed ? (
+            <InputBase
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              onBlur={handleEdit}
+              onKeyPress={(e) => e.key === "Enter" && handleEdit()}
+              autoFocus
+              fullWidth
+              sx={{ mr: 1 }}
+            />
+          ) : (
+            <>
+              <Typography
+                variant="body2"
+                sx={{
+                  textDecoration: task.completed ? "line-through" : "none",
+                }}
+              >
+                {highlightText(task.title, searchText)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {task.date}
+              </Typography>
+            </>
+          )}
         </Box>
-        <IconButton onClick={() => onTogglePin()} size="small">
-          <PushPinIcon
-            fontSize="small"
-            color={task.pinned ? "primary" : "action"}
-          />
-        </IconButton>
-        <IconButton onClick={() => setIsEditing(true)} size="small">
-          <EditIcon fontSize="small" />
-        </IconButton>
+        {!task.completed && (
+          <>
+            <IconButton onClick={() => onTogglePin()} size="small">
+              <PushPinIcon
+                fontSize="small"
+                color={task.pinned ? "primary" : "action"}
+              />
+            </IconButton>
+            <IconButton onClick={() => setIsEditing(!isEditing)} size="small">
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </>
+        )}
         <IconButton onClick={onDelete} size="small">
           <DeleteIcon fontSize="small" />
         </IconButton>
       </Box>
-      {isEditing && (
-        <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-          <InputBase
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            onBlur={handleEdit}
-            onKeyPress={(e) => e.key === "Enter" && handleEdit()}
-            autoFocus
-            fullWidth
-            sx={{ mr: 1 }}
-          />
-          <Button onClick={handleEdit} variant="contained" size="small">
-            Save
-          </Button>
-        </Box>
-      )}
     </motion.div>
   );
 };

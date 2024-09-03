@@ -97,13 +97,13 @@ const GoogleTasks = () => {
     setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
   };
 
-  const toggleTaskCompletion = (listId, taskIndex) => {
+  const toggleTaskCompletion = (listId, taskId) => {
     const updatedLists = lists.map((list) =>
       list.id === listId
         ? {
             ...list,
-            tasks: list.tasks.map((task, index) =>
-              index === taskIndex
+            tasks: list.tasks.map((task) =>
+              task.id === taskId
                 ? { ...task, completed: !task.completed }
                 : task
             ),
@@ -122,6 +122,9 @@ const GoogleTasks = () => {
             tasks: [
               ...list.tasks,
               {
+                id: `${list.title.slice(0, 3)}-${newTaskTitle.slice(0, 3)}-${
+                  list.tasks.length
+                }`,
                 title: newTaskTitle,
                 date: "Today",
                 completed: false,
@@ -187,12 +190,12 @@ const GoogleTasks = () => {
     objectStore.delete(id);
   };
 
-  const deleteTask = (listId, taskIndex) => {
+  const deleteTask = (listId, taskId) => {
     const updatedLists = lists.map((list) =>
       list.id === listId
         ? {
             ...list,
-            tasks: list.tasks.filter((_, index) => index !== taskIndex),
+            tasks: list.tasks.filter((task) => task.id !== taskId),
           }
         : list
     );
@@ -200,13 +203,13 @@ const GoogleTasks = () => {
     updateListInDB(updatedLists.find((list) => list.id === listId));
   };
 
-  const editTask = (listId, taskIndex, newTitle) => {
+  const editTask = (listId, taskId, newTitle) => {
     const updatedLists = lists.map((list) =>
       list.id === listId
         ? {
             ...list,
-            tasks: list.tasks.map((task, index) =>
-              index === taskIndex ? { ...task, title: newTitle } : task
+            tasks: list.tasks.map((task) =>
+              task.id === taskId ? { ...task, title: newTitle } : task
             ),
           }
         : list
@@ -215,13 +218,13 @@ const GoogleTasks = () => {
     updateListInDB(updatedLists.find((list) => list.id === listId));
   };
 
-  const togglePinTask = (listId, taskIndex) => {
+  const togglePinTask = (listId, taskId) => {
     const updatedLists = lists.map((list) =>
       list.id === listId
         ? {
             ...list,
-            tasks: list.tasks.map((task, index) =>
-              index === taskIndex
+            tasks: list.tasks.map((task) =>
+              task.id === taskId
                 ? { ...task, pinned: !task.pinned }
                 : { ...task, pinned: false }
             ),
@@ -302,15 +305,15 @@ const GoogleTasks = () => {
                 listId={list.id}
                 title={list.title}
                 tasks={list.tasks}
-                onToggleTask={(index) => toggleTaskCompletion(list.id, index)}
+                onToggleTask={(taskId) => toggleTaskCompletion(list.id, taskId)}
                 onAddTask={(title) => addTask(list.id, title)}
                 onRename={(newTitle) => renameList(list.id, newTitle)}
                 onDeleteList={() => handleDeleteList(list.id)}
-                onDeleteTask={(index) => deleteTask(list.id, index)}
-                onEditTask={(index, newTitle) =>
-                  editTask(list.id, index, newTitle)
+                onDeleteTask={(taskId) => deleteTask(list.id, taskId)}
+                onEditTask={(taskId, newTitle) =>
+                  editTask(list.id, taskId, newTitle)
                 }
-                onTogglePinTask={(index) => togglePinTask(list.id, index)}
+                onTogglePinTask={(taskId) => togglePinTask(list.id, taskId)}
                 searchText={searchText}
               />
             ))}

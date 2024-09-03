@@ -10,11 +10,16 @@ import {
   Grid,
   Divider,
   Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import TaskItem from "./TaskItem";
-
 const TaskList = ({
   listId,
   title,
@@ -31,6 +36,7 @@ const TaskList = ({
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [isRenaming, setIsRenaming] = useState(false);
   const [newListTitle, setNewListTitle] = useState(title);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const handleAddTask = () => {
     if (newTaskTitle.trim()) {
@@ -46,6 +52,14 @@ const TaskList = ({
     setIsRenaming(false);
   };
 
+  const handleDeleteList = () => {
+    if (tasks.length > 0) {
+      setDeleteConfirmOpen(true);
+    } else {
+      onDeleteList();
+    }
+  };
+
   const sortedTasks = [...tasks].sort((a, b) => {
     if (a.pinned === b.pinned) return 0;
     return a.pinned ? -1 : 1;
@@ -53,6 +67,8 @@ const TaskList = ({
 
   const uncompletedTasks = sortedTasks.filter((task) => !task.completed);
   const completedTasks = sortedTasks.filter((task) => task.completed);
+
+  const showCrownIcon = completedTasks.length >= 10;
 
   return (
     <Grid item xs={12} sm={6} md={4}>
@@ -66,23 +82,32 @@ const TaskList = ({
               >
                 <EditIcon />
               </IconButton>
-              <IconButton aria-label="delete" onClick={onDeleteList}>
+              <IconButton aria-label="delete" onClick={handleDeleteList}>
                 <DeleteIcon />
               </IconButton>
             </>
           }
           title={
-            isRenaming ? (
-              <InputBase
-                value={newListTitle}
-                onChange={(e) => setNewListTitle(e.target.value)}
-                onBlur={handleRename}
-                onKeyPress={(e) => e.key === "Enter" && handleRename()}
-                autoFocus
-              />
-            ) : (
-              title
-            )
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              {showCrownIcon && (
+                <EmojiEventsIcon
+                  color="primary"
+                  fontSize="small"
+                  sx={{ mr: 1 }}
+                />
+              )}
+              {isRenaming ? (
+                <InputBase
+                  value={newListTitle}
+                  onChange={(e) => setNewListTitle(e.target.value)}
+                  onBlur={handleRename}
+                  onKeyPress={(e) => e.key === "Enter" && handleRename()}
+                  autoFocus
+                />
+              ) : (
+                title
+              )}
+            </Box>
           }
           titleTypographyProps={{ variant: "h6", fontWeight: "bold" }}
         />
@@ -103,14 +128,14 @@ const TaskList = ({
               Add
             </Button>
           </Box>
-          {uncompletedTasks.map((task, index) => (
+          {uncompletedTasks.map((task) => (
             <TaskItem
-              key={index}
+              key={task.id}
               task={task}
-              onToggle={() => onToggleTask(index)}
-              onDelete={() => onDeleteTask(index)}
-              onEdit={(newTitle) => onEditTask(index, newTitle)}
-              onTogglePin={() => onTogglePinTask(index)}
+              onToggle={() => onToggleTask(task.id)}
+              onDelete={() => onDeleteTask(task.id)}
+              onEdit={(newTitle) => onEditTask(task.id, newTitle)}
+              onTogglePin={() => onTogglePinTask(task.id)}
               searchText={searchText}
             />
           ))}
@@ -120,18 +145,14 @@ const TaskList = ({
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 Completed Tasks
               </Typography>
-              {completedTasks.map((task, index) => (
+              {completedTasks.map((task) => (
                 <TaskItem
-                  key={index + uncompletedTasks.length}
+                  key={task.id}
                   task={task}
-                  onToggle={() => onToggleTask(index + uncompletedTasks.length)}
-                  onDelete={() => onDeleteTask(index + uncompletedTasks.length)}
-                  onEdit={(newTitle) =>
-                    onEditTask(index + uncompletedTasks.length, newTitle)
-                  }
-                  onTogglePin={() =>
-                    onTogglePinTask(index + uncompletedTasks.length)
-                  }
+                  onToggle={() => onToggleTask(task.id)}
+                  onDelete={() => onDeleteTask(task.id)}
+                  onEdit={(newTitle) => onEditTask(task.id, newTitle)}
+                  onTogglePin={() => onTogglePinTask(task.id)}
                   searchText={searchText}
                 />
               ))}
@@ -139,6 +160,31 @@ const TaskList = ({
           )}
         </CardContent>
       </Card>
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Confirm Delete"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this list? It contains tasks.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              onDeleteList();
+              setDeleteConfirmOpen(false);
+            }}
+            autoFocus
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };
