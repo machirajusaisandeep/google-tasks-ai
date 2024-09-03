@@ -1,10 +1,10 @@
 import "./App.css";
-import TasksBoard from "./Taskboard";
+import GoogleTasks from "./Tasks/Taskboard";
 
 function App() {
   return (
     <>
-      <TasksBoard />
+      <GoogleTasks />
     </>
   );
 }
